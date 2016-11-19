@@ -17,4 +17,8 @@ class AppConfiguration {
     int httpPort() {
         return environment.getProperty("http.port", Integer.class, 8080);
     }
+
+    String mavenHome() {
+        return environment.getProperty("maven.home", "/usr");
+    }
 }

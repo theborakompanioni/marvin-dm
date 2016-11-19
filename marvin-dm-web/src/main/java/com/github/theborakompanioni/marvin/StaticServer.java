@@ -4,7 +4,6 @@ import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.handler.StaticHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
 @Slf4j
@@ -12,7 +11,6 @@ class StaticServer extends AbstractVerticle {
 
     private AppConfiguration configuration;
 
-    @Autowired
     public StaticServer(AppConfiguration configuration) {
         this.configuration = configuration;
     }
