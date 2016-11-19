@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.Invoker;
 import org.hamcrest.CustomMatcher;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -16,26 +17,39 @@ import static org.junit.Assert.assertThat;
 
 @Slf4j
 public class MavenVersionUpdateFinderTest {
-    @Test
-    public void accept() throws Exception {
+    private MavenVersionUpdateFinder sut;
+
+    private File testPomFile;
+
+    @Before
+    public void init() {
+
         Invoker invoker = new DefaultInvoker();
         invoker.setMavenHome(new File("/usr"));
 
         MavenInvoker mavenInvoker = new MavenInvoker(invoker);
-        final MavenVersionUpdateFinder mavenVersionUpdateFinder = new MavenVersionUpdateFinder(mavenInvoker);
+        this.sut = new MavenVersionUpdateFinder(mavenInvoker);
 
         final String fileName = Resources.getResource("test-pom.xml").getFile();
-        final File pomFile = new File(fileName);
-        final DependencySummary summary = mavenVersionUpdateFinder.accept(pomFile);
+        this.testPomFile = new File(fileName);
+        assertThat(this.testPomFile.exists(), is(true));
+    }
+
+    @Test
+    public void itShouldFindUpdatesForJunit() throws Exception {
+        final String junit = "junit:junit";
+        final String requiredVersion = "4.11";
+
+        final DependencySummary summary = sut.accept(testPomFile);
 
         assertThat(summary, is(notNullValue()));
         assertThat(summary.getDependencies(), is(notNullValue()));
-        assertThat(summary.getDependencies(), hasEntry(equalTo("junit:junit"),
+        assertThat(summary.getDependencies(), hasEntry(equalTo(junit),
                 new CustomMatcher<Versions>("") {
                     @Override
                     public boolean matches(Object item) {
                         Versions value = (Versions) item;
-                        return "4.11".equals(value.getRequired()) &&
+                        return requiredVersion.equals(value.getRequired()) &&
                                 value.isOutOfDate();
                     }
                 }));
