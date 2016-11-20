@@ -10,14 +10,14 @@
     <version>0.0.1</version>
 
     <properties>
-        <junit.version>4.11</junit.version>
+        <outdatedJunit.version>4.11</outdatedJunit.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <version>${outdatedJunit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

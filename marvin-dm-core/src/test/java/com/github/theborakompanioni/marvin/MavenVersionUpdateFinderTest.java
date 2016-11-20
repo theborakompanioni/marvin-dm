@@ -19,6 +19,15 @@ import static org.junit.Assert.assertThat;
 @Slf4j
 public class MavenVersionUpdateFinderTest {
     private static boolean IS_TRAVIS_CI;
+    private static final String TRAVIS_MAVEN_HOME = "/usr/local/maven";
+    private static final String DEFAULT_MAVEN_HOME = "/usr";
+
+    private static String mavenHome() {
+        if (IS_TRAVIS_CI) {
+            return TRAVIS_MAVEN_HOME;
+        }
+        return DEFAULT_MAVEN_HOME;
+    }
 
     private MavenVersionUpdateFinder sut;
 
@@ -26,14 +35,21 @@ public class MavenVersionUpdateFinderTest {
 
     @BeforeClass
     public static void init() {
-        IS_TRAVIS_CI = "true".equals(System.getenv("TRAVIS")) &&
-                "true".equals(System.getenv("CI"));
+        IS_TRAVIS_CI = "true".equals(System.getenv("CI")) &&
+                "true".equals(System.getenv("TRAVIS"));
+
+        if (IS_TRAVIS_CI) {
+            log.info("Running inside travis ci environment..");
+        }
     }
 
     @Before
     public void setUp() {
+        final File mavenHomeDir = new File(mavenHome());
+        assertThat("maven home dir exists", mavenHomeDir.exists(), is(true));
+
         Invoker invoker = new DefaultInvoker();
-        invoker.setMavenHome(new File(getMavenHome()));
+        invoker.setMavenHome(mavenHomeDir);
 
         MavenInvoker mavenInvoker = new MavenInvoker(invoker);
         this.sut = new MavenVersionUpdateFinder(mavenInvoker);
@@ -41,14 +57,6 @@ public class MavenVersionUpdateFinderTest {
         final String fileName = Resources.getResource("test-pom.xml").getFile();
         this.testPomFile = new File(fileName);
         assertThat(this.testPomFile.exists(), is(true));
-    }
-
-    private String getMavenHome() {
-        if (IS_TRAVIS_CI) {
-            log.info("Running inside travis ci server");
-            return "/usr/local/maven";
-        }
-        return "/usr";
     }
 
     @Test
