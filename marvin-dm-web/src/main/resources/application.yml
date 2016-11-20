@@ -1,0 +1,22 @@
+spring.profiles.active: production
+
+app.name: marvin-dm
+app.description: gets you an overview of your project maven dependencies
+
+server.port: 8080
+server.use-forward-headers: true
+server.compression.enabled: true
+
+management.port: 9001
+management.context-path: /actuator
+
+#spring.boot.admin.url: http://localhost:9080
+
+# LOGGING
+logging.path: ./var/log
+logging.file: application.log
+logging.config: classpath:logback.xml
+logging.level.org.springframework: INFO
+
+
+marvin.maven-home: /usr

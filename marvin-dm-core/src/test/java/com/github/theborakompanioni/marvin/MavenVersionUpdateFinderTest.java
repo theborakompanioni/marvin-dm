@@ -23,7 +23,6 @@ public class MavenVersionUpdateFinderTest {
 
     @Before
     public void init() {
-
         Invoker invoker = new DefaultInvoker();
         invoker.setMavenHome(new File("/usr"));
 
