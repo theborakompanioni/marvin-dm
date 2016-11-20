@@ -24,7 +24,7 @@ public class MavenVersionUpdateFinderTest {
     @Before
     public void init() {
         Invoker invoker = new DefaultInvoker();
-        invoker.setMavenHome(new File("/usr"));
+        invoker.setMavenHome(new File(getMavenHome()));
 
         MavenInvoker mavenInvoker = new MavenInvoker(invoker);
         this.sut = new MavenVersionUpdateFinder(mavenInvoker);
@@ -32,6 +32,17 @@ public class MavenVersionUpdateFinderTest {
         final String fileName = Resources.getResource("test-pom.xml").getFile();
         this.testPomFile = new File(fileName);
         assertThat(this.testPomFile.exists(), is(true));
+    }
+
+    private String getMavenHome() {
+        final boolean isTravisCI =
+                "true".equals(System.getenv("TRAVIS")) &&
+                        "true".equals(System.getenv("CI"));
+        if (isTravisCI) {
+            log.info("Running inside travis ci server");
+            return "/usr/local/maven";
+        }
+        return "/usr";
     }
 
     @Test
