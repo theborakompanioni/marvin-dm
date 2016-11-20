@@ -8,6 +8,7 @@ import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.Invoker;
 import org.hamcrest.CustomMatcher;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -17,12 +18,20 @@ import static org.junit.Assert.assertThat;
 
 @Slf4j
 public class MavenVersionUpdateFinderTest {
+    private static boolean IS_TRAVIS_CI;
+
     private MavenVersionUpdateFinder sut;
 
     private File testPomFile;
 
+    @BeforeClass
+    public static void init() {
+        IS_TRAVIS_CI = "true".equals(System.getenv("TRAVIS")) &&
+                "true".equals(System.getenv("CI"));
+    }
+
     @Before
-    public void init() {
+    public void setUp() {
         Invoker invoker = new DefaultInvoker();
         invoker.setMavenHome(new File(getMavenHome()));
 
@@ -35,10 +44,7 @@ public class MavenVersionUpdateFinderTest {
     }
 
     private String getMavenHome() {
-        final boolean isTravisCI =
-                "true".equals(System.getenv("TRAVIS")) &&
-                        "true".equals(System.getenv("CI"));
-        if (isTravisCI) {
+        if (IS_TRAVIS_CI) {
             log.info("Running inside travis ci server");
             return "/usr/local/maven";
         }

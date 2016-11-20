@@ -37,7 +37,6 @@ public class MavenVersionUpdateFinder {
         final SummaryInvocationResult invocationResult = invoker.apply(request);
         final List<String> outputLines = invocationResult.getOutputLines();
 
-
         final List<String> dependenciesLines = findLogLinesWithDependenciesUpdates(outputLines);
         Map<String, Versions> dependencyUpdates = findUpdates(dependenciesLines);
 
