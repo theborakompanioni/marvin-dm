@@ -12,6 +12,7 @@ import java.util.Optional;
 public class AppProperties {
     private String mavenHome;
     private String webroot;
+    private int cacheTimeInSeconds = 60 * 60;
 
     public String getMavenHome() {
         return Optional.ofNullable(mavenHome)

@@ -1,5 +1,6 @@
 package com.github.theborakompanioni.marvin;
 
+import com.google.common.primitives.Ints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -33,5 +34,13 @@ class AppConfiguration {
         final String pathWhenInsideJarFile = "BOOT-INF/classes/" + appProperties.getWebroot();
         boolean insideJarFile = new ClassPathResource(pathWhenInsideJarFile).exists();
         return insideJarFile ? pathWhenInsideJarFile : appProperties.getWebroot();
+    }
+
+    int cacheTimeInSeconds() {
+        return Ints.max(1, appProperties.getCacheTimeInSeconds());
+    }
+
+    int revalidateInSeconds() {
+        return Ints.max(1, appProperties.getCacheTimeInSeconds() / 10);
     }
 }

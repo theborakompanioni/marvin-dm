@@ -45,7 +45,7 @@ class VersionsApiServer extends AbstractVerticle {
         router.route().failureHandler(RouteHandlers.failureHandler());
 
 
-        final int maxAgeSeconds = 60 * 60;
+        final int maxAgeSeconds = configuration.revalidateInSeconds();
         router.routeWithRegex(".*\\.svg")
                 .pathRegex("\\/([^\\/]+)\\/([^\\/]+)\\.svg")
                 .handler(serveFromCache(maxAgeSeconds));
@@ -82,6 +82,7 @@ class VersionsApiServer extends AbstractVerticle {
                 return false;
             }
             ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(ifModifiedSince, RFC_1123_DATE_TIME);
+            // TODO: use real last modified date of resource (fetching time)
             final ZonedDateTime lastModified = ZonedDateTime.now(gmt).minus(maxAgeSeconds, ChronoUnit.SECONDS);
             boolean modifiedSince = lastModified.isAfter(ifModifiedSinceDate);
             return !modifiedSince;

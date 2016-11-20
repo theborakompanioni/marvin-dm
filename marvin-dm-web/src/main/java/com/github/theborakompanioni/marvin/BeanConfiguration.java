@@ -107,7 +107,7 @@ class BeanConfiguration {
     @Bean
     public HTreeMap<String, String> cacheMap(DB db) {
         return db.hashMap("dependency-summary-cache")
-                .expireAfterCreate(6, TimeUnit.HOURS)
+                .expireAfterCreate(appConfiguration.cacheTimeInSeconds(), TimeUnit.SECONDS)
                 .expireMaxSize(32 * 1024 * 1024)
                 .expireExecutor(Executors.newScheduledThreadPool(2))
                 .keySerializer(Serializer.STRING)
