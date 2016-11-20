@@ -2,9 +2,11 @@ package com.github.theborakompanioni.marvin;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
+import com.google.common.net.HttpHeaders;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.rxjava.core.AbstractVerticle;
+import io.vertx.rxjava.core.MultiMap;
 import io.vertx.rxjava.core.http.HttpServerRequest;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
@@ -12,8 +14,14 @@ import rx.functions.Action1;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.function.Function;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.NOT_MODIFIED;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
 
 
@@ -36,10 +44,21 @@ class VersionsApiServer extends AbstractVerticle {
         router.route().handler(RouteHandlers.responseTimeHandler());
         router.route().failureHandler(RouteHandlers.failureHandler());
 
+
+        final int maxAgeSeconds = 60 * 60;
+        router.routeWithRegex(".*\\.svg")
+                .pathRegex("\\/([^\\/]+)\\/([^\\/]+)\\.svg")
+                .handler(serveFromCache(maxAgeSeconds));
+
+        router.routeWithRegex(".*\\.svg")
+                .pathRegex("\\/([^\\/]+)\\/([^\\/]+)\\.svg")
+                .handler(addCacheHeaders(maxAgeSeconds));
+
         router.routeWithRegex(".*\\.svg")
                 .pathRegex("\\/([^\\/]+)\\/([^\\/]+)\\.svg")
                 .produces("image/svg+xml")
                 .handler(svgHandler());
+
 
         router.route("/:username/:repository")
                 .handler(contextSetupHandler());
@@ -50,6 +69,41 @@ class VersionsApiServer extends AbstractVerticle {
         vertx.createHttpServer()
                 .requestHandler(router::accept)
                 .listen(configuration.httpPort());
+    }
+
+    private Handler<RoutingContext> serveFromCache(int maxAgeSeconds) {
+        final ZoneId gmt = ZoneId.of("GMT");
+        final Function<RoutingContext, Boolean> shouldUseCache = routingContext -> {
+            String ifModifiedSince = routingContext.request().headers().get(
+                    HttpHeaders.IF_MODIFIED_SINCE
+            );
+            if (ifModifiedSince == null) {
+                // Not a conditional request
+                return false;
+            }
+            ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(ifModifiedSince, RFC_1123_DATE_TIME);
+            final ZonedDateTime lastModified = ZonedDateTime.now(gmt).minus(maxAgeSeconds, ChronoUnit.SECONDS);
+            boolean modifiedSince = lastModified.isAfter(ifModifiedSinceDate);
+            return !modifiedSince;
+        };
+        return routingContext -> {
+            if (shouldUseCache.apply(routingContext)) {
+                routingContext.response().setStatusCode(NOT_MODIFIED.code()).end();
+            } else {
+                routingContext.next();
+            }
+        };
+    }
+
+    private Handler<RoutingContext> addCacheHeaders(int maxAgeSeconds) {
+        return routingContext -> {
+            final String now = RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("GMT")));
+            MultiMap headers = routingContext.response().headers();
+            headers.set(HttpHeaders.CACHE_CONTROL, "public, max-age=" + maxAgeSeconds);
+            headers.set(HttpHeaders.LAST_MODIFIED, now);
+            headers.set(HttpHeaders.DATE, now);
+            routingContext.next();
+        };
     }
 
     private Handler<RoutingContext> contextSetupHandler() {
