@@ -39,7 +39,7 @@ class VersionsApiServer extends AbstractVerticle {
     public void start() throws Exception {
         Router router = Router.router(vertx);
 
-        router.route().handler(RouteHandlers.loggerHandler());
+        //router.route().handler(RouteHandlers.loggerHandler());
         router.route().handler(RouteHandlers.timeoutHandler());
         router.route().handler(RouteHandlers.responseTimeHandler());
         router.route().failureHandler(RouteHandlers.failureHandler());

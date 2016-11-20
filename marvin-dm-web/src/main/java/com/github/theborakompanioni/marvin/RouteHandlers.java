@@ -22,7 +22,7 @@ final class RouteHandlers {
     }
 
     static ErrorHandler failureHandler() {
-        boolean displayExceptionDetails = false;
+        boolean displayExceptionDetails = true;
         return ErrorHandler.create(displayExceptionDetails);
     }
 
@@ -31,7 +31,7 @@ final class RouteHandlers {
     }
 
     static TimeoutHandler timeoutHandler() {
-        return TimeoutHandler.create(10_000);
+        return TimeoutHandler.create(30_000);
     }
 
     static BodyHandler bodyHandler() {

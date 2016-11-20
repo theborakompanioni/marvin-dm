@@ -10,8 +10,16 @@
     </parent>
 
     <artifactId>marvin-dm-web</artifactId>
+    <properties>
+        <mapdb.version>3.0.2</mapdb.version>
+    </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>${mapdb.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.theborakompanioni</groupId>
             <artifactId>marvin-dm-core</artifactId>

@@ -5,14 +5,24 @@ import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.core.http.HttpClient;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.Invoker;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.HTreeMap;
+import org.mapdb.Serializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 class BeanConfiguration {
@@ -37,13 +47,13 @@ class BeanConfiguration {
 
     @Bean
     @Order(1)
-    public VersionsApiServer versionsApiServer() {
-        return new VersionsApiServer(appConfiguration, dependencySummaryProvider());
+    public VersionsApiServer versionsApiServer(DependencySummaryProvider dependencySummaryProvider) {
+        return new VersionsApiServer(appConfiguration, dependencySummaryProvider);
     }
 
     @Bean
-    public DependencySummaryProvider dependencySummaryProvider() {
-        return new DependencySummaryProviderImpl(mavenVersionUpdateFinder(), pomFetcher());
+    public DependencySummaryProvider dependencySummaryProvider(DependencySummaryCache dependencySummaryCache) {
+        return new DependencySummaryProviderImpl(mavenVersionUpdateFinder(), pomFetcher(), dependencySummaryCache);
     }
 
     @Bean
@@ -72,6 +82,42 @@ class BeanConfiguration {
         return Optional.of(new File(appConfiguration.mavenHome()))
                 .filter(File::exists)
                 .orElseThrow(() -> new IllegalStateException("Maven Home dir does not exist"));
+    }
+
+
+    @Bean
+    @Profile("production")
+    public DB productionCache() {
+        Path file = Paths.get("dependency-summary.db");
+        return DBMaker.fileDB(file.toString())
+                .closeOnJvmShutdown()
+                .make();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DB.class)
+    public DB developmentCache() {
+        Path file = Paths.get("dependency-summary-dev.db");
+        return DBMaker.fileDB(file.toString())
+                .fileDeleteAfterClose()
+                .closeOnJvmShutdown()
+                .make();
+    }
+
+    @Bean
+    public HTreeMap<String, String> cacheMap(DB db) {
+        return db.hashMap("dependency-summary-cache")
+                .expireAfterCreate(6, TimeUnit.HOURS)
+                .expireMaxSize(32 * 1024 * 1024)
+                .expireExecutor(Executors.newScheduledThreadPool(2))
+                .keySerializer(Serializer.STRING)
+                .valueSerializer(Serializer.STRING)
+                .createOrOpen();
+    }
+
+    @Bean
+    public DependencySummaryCache dependencySummaryCache(HTreeMap<String, String> cacheMap) {
+        return new DependencySummaryCache(cacheMap);
     }
 
     @Bean
