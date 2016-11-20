@@ -17,6 +17,12 @@ import static java.util.Objects.requireNonNull;
 
 public class MavenVersionUpdateFinder {
     private static final List<String> GOALS = Collections.singletonList("versions:display-dependency-updates");
+    private static final Pattern versionFromLogLinePattern = Pattern.compile("\\[INFO\\] (.*) (.*) -> (.*)");
+    private static final Pattern nameFromLogLinePattern = Pattern.compile("\\[INFO\\]   (.*) \\..*");
+    private static final String dependencyManagementStartPhrase = "[INFO] The following dependencies in Dependency Management have newer versions:";
+    private static final String dependenciesStartPhrase = "[INFO] The following dependencies in Dependencies have newer versions:";
+    private static final String stopPhrase = "[INFO]";
+    private static final Function<String, Boolean> isStopPhrase = test -> test != null && stopPhrase.equals(test.trim());
 
     private final MavenInvoker invoker;
 
@@ -76,21 +82,13 @@ public class MavenVersionUpdateFinder {
     private List<String> findLogLinesWithDependencyManagementUpdates(List<String> outputLines) {
         requireNonNull(outputLines);
 
-        final String startPhrase = "[INFO] The following dependencies in Dependency Management have newer versions:";
-        final String stopPhrase = "[INFO]";
-        final Function<String, Boolean> isStopPhrase = test -> stopPhrase.equals(test.trim());
-
-        return extractLines(outputLines, startPhrase, isStopPhrase);
+        return extractLines(outputLines, dependencyManagementStartPhrase, isStopPhrase);
     }
 
     private List<String> findLogLinesWithDependenciesUpdates(List<String> outputLines) {
         requireNonNull(outputLines);
 
-        final String startPhrase = "[INFO] The following dependencies in Dependencies have newer versions:";
-        final String stopPhrase = "[INFO]";
-        final Function<String, Boolean> isStopPhrase = test -> stopPhrase.equals(test.trim());
-
-        return extractLines(outputLines, startPhrase, isStopPhrase);
+        return extractLines(outputLines, dependenciesStartPhrase, isStopPhrase);
     }
 
     private List<String> extractLines(List<String> lines, String startPhrase, Function<String, Boolean> isStopPhrase) {
@@ -121,8 +119,7 @@ public class MavenVersionUpdateFinder {
     }
 
     private Optional<Versions> extractVersionFromLogLine(String line) {
-        final Pattern pattern = Pattern.compile("\\[INFO\\] (.*) (.*) -> (.*)");
-        final Matcher matcher = pattern.matcher(line);
+        final Matcher matcher = versionFromLogLinePattern.matcher(line);
         if (!matcher.matches()) {
             return Optional.empty();
         }
@@ -136,8 +133,7 @@ public class MavenVersionUpdateFinder {
     }
 
     private Optional<String> extractNameFromLogLine(String line) {
-        final Pattern pattern = Pattern.compile("\\[INFO\\]   (.*) \\..*");
-        final Matcher matcher = pattern.matcher(line);
+        final Matcher matcher = nameFromLogLinePattern.matcher(line);
         if (!matcher.matches()) {
             return Optional.empty();
         }
