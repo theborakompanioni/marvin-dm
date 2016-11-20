@@ -47,7 +47,7 @@ class BeanConfiguration {
 
     @Bean
     public PomFetcher pomFetcher() {
-        return new PomFetcherImpl(httpClient());
+        return new GithubPomFetcher(httpClient());
     }
 
     @Bean
