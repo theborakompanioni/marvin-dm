@@ -1,7 +1,7 @@
 package com.github.theborakompanioni.marvin;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.core.http.HttpClient;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.Invoker;
@@ -35,7 +35,12 @@ class BeanConfiguration {
 
     @Bean
     public VersionsApiServer versionsApiServer() {
-        return new VersionsApiServer(appConfiguration, mavenVersionUpdateFinder(), pomFetcher());
+        return new VersionsApiServer(appConfiguration, dependencySummaryProvider());
+    }
+
+    @Bean
+    public DependencySummaryProvider dependencySummaryProvider() {
+        return new DependencySummaryProviderImpl(mavenVersionUpdateFinder(), pomFetcher());
     }
 
     @Bean
@@ -44,12 +49,12 @@ class BeanConfiguration {
                 .setSsl(true)
                 .setKeepAlive(false)
                 .setLogActivity(true);
-        return io.vertx.rxjava.core.Vertx.vertx().createHttpClient(options);
+        return vertx().createHttpClient(options);
     }
 
     @Bean
-    public PomFetcher pomFetcher() {
-        return new GithubPomFetcher(httpClient());
+    public PomFileProvider pomFetcher() {
+        return new GithubPomFileProvider(httpClient());
     }
 
     @Bean

@@ -2,7 +2,8 @@ package com.github.theborakompanioni.marvin;
 
 import com.google.common.collect.ImmutableList;
 import io.vertx.core.Verticle;
-import io.vertx.core.Vertx;
+import io.vertx.rxjava.core.RxHelper;
+import io.vertx.rxjava.core.Vertx;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,6 +28,6 @@ public class Application {
 
     @PostConstruct
     public void deployVerticle() {
-        verticles.forEach(verticle -> vertx.deployVerticle(verticle));
+        verticles.forEach(verticle -> RxHelper.deployVerticle(vertx, verticle));
     }
 }

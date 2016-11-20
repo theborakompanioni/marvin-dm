@@ -14,14 +14,14 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
 
-public class GithubPomFetcherTest {
-    private GithubPomFetcher sut;
+public class GithubPomFileProviderTest {
+    private GithubPomFileProvider sut;
 
     @Before
     public void setUp() {
         final HttpClientOptions httpClientOptions = new HttpClientOptions().setSsl(true);
         final HttpClient httpClient = Vertx.vertx().createHttpClient(httpClientOptions);
-        this.sut = new GithubPomFetcher(httpClient);
+        this.sut = new GithubPomFileProvider(httpClient);
     }
     
     @Test

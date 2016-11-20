@@ -9,11 +9,11 @@ import rx.Observable;
 
 import static java.util.Objects.requireNonNull;
 
-public class GithubPomFetcher implements PomFetcher {
+public class GithubPomFileProvider implements PomFileProvider {
 
     private HttpClient httpClient;
 
-    public GithubPomFetcher(HttpClient httpClient) {
+    public GithubPomFileProvider(HttpClient httpClient) {
         this.httpClient = requireNonNull(httpClient);
     }
 
