@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.annotation.Order;
 
 import java.io.File;
 
@@ -28,12 +29,13 @@ class BeanConfiguration {
     }
 
     @Bean
-    @DependsOn("versionsApiServer")
+    @Order(2)
     public StaticServer staticServer() {
         return new StaticServer(appConfiguration);
     }
 
     @Bean
+    @Order(1)
     public VersionsApiServer versionsApiServer() {
         return new VersionsApiServer(appConfiguration, dependencySummaryProvider());
     }

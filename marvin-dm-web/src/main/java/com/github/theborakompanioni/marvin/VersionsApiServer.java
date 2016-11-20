@@ -1,6 +1,7 @@
 package com.github.theborakompanioni.marvin;
 
 import com.google.common.base.Strings;
+import io.vertx.core.json.Json;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.ext.web.Router;
 
@@ -33,8 +34,12 @@ class VersionsApiServer extends AbstractVerticle {
                     .orElseThrow(IllegalArgumentException::new);
 
             dependencySummaryProvider.fetchDependencySummary(username, repository)
-                    .subscribe(dependencySummary -> routingContext.response()
-                            .end("out of date: " + dependencySummary.isOutOfDate()));
+                    .subscribe(dependencySummary -> {
+                        final String json = Json.encodePrettily(dependencySummary);
+
+                        routingContext.response()
+                                .end(json);
+                    });
 
         });
 
