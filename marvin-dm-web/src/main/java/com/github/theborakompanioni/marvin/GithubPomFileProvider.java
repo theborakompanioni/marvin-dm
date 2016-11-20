@@ -7,6 +7,8 @@ import io.vertx.rxjava.core.http.HttpClientRequest;
 import io.vertx.rxjava.core.http.HttpClientResponse;
 import rx.Observable;
 
+import java.io.FileNotFoundException;
+
 import static java.util.Objects.requireNonNull;
 
 public class GithubPomFileProvider implements PomFileProvider {
@@ -33,6 +35,14 @@ public class GithubPomFileProvider implements PomFileProvider {
             resp.subscribe(subscriber);
             req.end();
         })
+                .map(response -> {
+                    if (response.statusCode() == 404) {
+                        throw new RuntimeException(new FileNotFoundException());
+                    } else if (response.statusCode() != 200) {
+                        throw new RuntimeException("response.status != 200");
+                    }
+                    return response;
+                })
                 .flatMap(HttpClientResponse::toObservable)
                 .reduce(Buffer.buffer(), Buffer::appendBuffer)
                 .map(response -> response.getString(0, response.length()));

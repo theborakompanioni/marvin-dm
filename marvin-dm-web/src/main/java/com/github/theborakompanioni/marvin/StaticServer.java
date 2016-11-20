@@ -19,7 +19,7 @@ class StaticServer extends AbstractVerticle {
     public void start() throws Exception {
         Router router = Router.router(vertx);
 
-        String webroot = getRoot();
+        String webroot = configuration.webroot();
         log.info("Using '{}' as static webroot", webroot);
 
         router.route().handler(StaticHandler.create(webroot));
@@ -27,11 +27,5 @@ class StaticServer extends AbstractVerticle {
         vertx.createHttpServer()
                 .requestHandler(router::accept)
                 .listen(configuration.httpPort());
-    }
-
-    private String getRoot() {
-        final String pathWhenInsideJarFile = "BOOT-INF/classes/webroot";
-        boolean insideJarFile = new ClassPathResource(pathWhenInsideJarFile).exists();
-        return insideJarFile ? pathWhenInsideJarFile : "webroot";
     }
 }

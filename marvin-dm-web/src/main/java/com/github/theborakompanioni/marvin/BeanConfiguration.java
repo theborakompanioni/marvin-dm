@@ -8,10 +8,11 @@ import org.apache.maven.shared.invoker.Invoker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
+import java.util.Optional;
 
 @Configuration
 class BeanConfiguration {
@@ -62,8 +63,22 @@ class BeanConfiguration {
     @Bean
     public Invoker invoker() {
         Invoker invoker = new DefaultInvoker();
-        invoker.setMavenHome(new File(appConfiguration.mavenHome()));
+        invoker.setMavenHome(mavenHome());
         return invoker;
+    }
+
+    @Bean
+    public File mavenHome() {
+        return Optional.of(new File(appConfiguration.mavenHome()))
+                .filter(File::exists)
+                .orElseThrow(() -> new IllegalStateException("Maven Home dir does not exist"));
+    }
+
+    @Bean
+    public String webroot() {
+        final String pathWhenInsideJarFile = "BOOT-INF/classes/webroot";
+        boolean insideJarFile = new ClassPathResource(pathWhenInsideJarFile).exists();
+        return insideJarFile ? pathWhenInsideJarFile : "webroot";
     }
 
     @Bean
