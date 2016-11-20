@@ -8,6 +8,7 @@ import org.apache.maven.shared.invoker.Invoker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import java.io.File;
 
@@ -27,6 +28,7 @@ class BeanConfiguration {
     }
 
     @Bean
+    @DependsOn("versionsApiServer")
     public StaticServer staticServer() {
         return new StaticServer(appConfiguration);
     }
