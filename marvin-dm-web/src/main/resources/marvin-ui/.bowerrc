@@ -1,3 +1,4 @@
 {
-	"directory" : "src/bower_components"
+  "name": "mdl-starter-kit",
+  "directory": "./bower_components"
 }
