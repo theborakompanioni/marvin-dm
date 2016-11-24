@@ -1,0 +1,29 @@
+<md-toolbar>
+  <div class="md-toolbar-tools">
+    <h2>
+      <a ui-sref="home" ng-click="scrollSmoothToTop()"><span id="toolbarTitle">{{AppName}}</span></a>
+    </h2>
+    <span flex></span>
+      <div>
+        <div class="lock-size" layout="row" layout-align="center center">
+          <md-button data-ng-repeat="item in topBarMenuItems | orderBy: 'position'" ui-sref="{{item.uiState}}">
+            {{item.title}}
+          </md-button>
+          <!--md-fab-speed-dial md-open="false" md-direction="left" ng-class="md-scale">
+            <md-fab-trigger>
+              <md-button aria-label="menu" class="md-fab">
+                <md-icon class="material-icons">language</md-icon>
+              </md-button>
+            </md-fab-trigger>
+            <md-fab-actions data-ng-repeat="item in localeMenuItems | orderBy: 'position'">
+              <md-button data-ng-repeat="subItem in item.items | orderBy: 'position'">
+                <a  ng-click="changeLanguage(subItem.uiState)"
+                  data-ng-bind="subItem.title">
+                </a>
+              </md-button>
+            </md-fab-actions>
+        </md-fab-speed-dial-->
+      </div>
+    </div>
+  </div>
+</md-toolbar>

@@ -1,9 +1,9 @@
 ######################
 # Project Specific
 ######################
-/src/main/webapp/dist
-app.pid
-app.port
+/src/main/marvin-ui/dist
+application.pid
+application.port
 .vertx/
 
 ######################
