@@ -3,6 +3,9 @@ package com.github.theborakompanioni.marvin;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.core.http.HttpClient;
+import io.vertx.rxjava.ext.web.Router;
+import io.vertx.rxjava.ext.web.handler.StaticHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.Invoker;
 import org.mapdb.DB;
@@ -14,7 +17,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
@@ -24,6 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Configuration
 class BeanConfiguration {
 
@@ -40,6 +43,33 @@ class BeanConfiguration {
     }
 
     @Bean
+    public HttpServer webServer(Router router) {
+        return new HttpServer(appConfiguration, router);
+    }
+
+    @Bean
+    public ApiRouteConfiguration apiRouteConfiguration(DependencySummaryProvider dependencySummaryProvider) {
+        return new ApiRouteConfiguration(appConfiguration, vertx(), dependencySummaryProvider);
+    }
+
+    @Bean
+    public Router router(ApiRouteConfiguration apiRouteConfiguration) {
+        Router router = Router.router(vertx());
+        router.mountSubRouter("/api", apiRouteConfiguration.router());
+        router.route().handler(staticHandler());
+
+        return router;
+    }
+
+    @Bean
+    public StaticHandler staticHandler() {
+        String webroot = appConfiguration.webroot();
+        log.info("Using '{}' as static webroot", webroot);
+
+        return StaticHandler.create(webroot);
+    }
+/*
+    @Bean
     @Order(2)
     public StaticServer staticServer() {
         return new StaticServer(appConfiguration);
@@ -49,7 +79,7 @@ class BeanConfiguration {
     @Order(1)
     public VersionsApiServer versionsApiServer(DependencySummaryProvider dependencySummaryProvider) {
         return new VersionsApiServer(appConfiguration, dependencySummaryProvider);
-    }
+    }*/
 
     @Bean
     public DependencySummaryProvider dependencySummaryProvider(DependencySummaryCache dependencySummaryCache) {

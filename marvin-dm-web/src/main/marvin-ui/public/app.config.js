@@ -4,7 +4,13 @@
 var ApplicationConfiguration = (function () {
     // Init module configuration options
     var applicationModuleName = 'App';
-    var applicationModuleVendorDependencies = ['ngMaterial', 'ui.utils', 'ui.router', 'ngAnimate', 'pascalprecht.translate'];
+    var applicationModuleVendorDependencies = [
+        'ngMaterial',
+        'ui.utils',
+        'ui.router',
+        'ngAnimate',
+        'pascalprecht.translate'
+    ];
 
     // Add a new vertical module
     var registerModule = function (moduleName, dependencies) {

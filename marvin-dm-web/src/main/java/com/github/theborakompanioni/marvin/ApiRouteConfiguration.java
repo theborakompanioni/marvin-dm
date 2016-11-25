@@ -5,8 +5,8 @@ import com.google.common.io.Resources;
 import com.google.common.net.HttpHeaders;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
-import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.MultiMap;
+import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.core.http.HttpServerRequest;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
@@ -25,18 +25,21 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Objects.requireNonNull;
 
 
-class VersionsApiServer extends AbstractVerticle {
+class ApiRouteConfiguration {
 
     private final AppConfiguration configuration;
     private final DependencySummaryProvider dependencySummaryProvider;
+    private final Vertx vertx;
 
-    public VersionsApiServer(AppConfiguration configuration, DependencySummaryProvider dependencySummaryProvider) {
+    public ApiRouteConfiguration(AppConfiguration configuration,
+                                 Vertx vertx,
+                                 DependencySummaryProvider dependencySummaryProvider) {
         this.configuration = requireNonNull(configuration);
+        this.vertx = requireNonNull(vertx);
         this.dependencySummaryProvider = requireNonNull(dependencySummaryProvider);
     }
 
-    @Override
-    public void start() throws Exception {
+    public Router router() {
         Router router = Router.router(vertx);
 
         //router.route().handler(RouteHandlers.loggerHandler());
@@ -66,9 +69,7 @@ class VersionsApiServer extends AbstractVerticle {
         router.route("/:username/:repository")
                 .handler(jsonHandler());
 
-        vertx.createHttpServer()
-                .requestHandler(router::accept)
-                .listen(configuration.httpPort());
+        return router;
     }
 
     private Handler<RoutingContext> serveFromCache(int maxAgeSeconds) {
