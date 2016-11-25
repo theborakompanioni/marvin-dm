@@ -2,6 +2,8 @@
 
 angular.module('repository')
     .controller('RepositoryCtrl', ['$scope', function ($scope) {
+        $scope.objectKeys = Object.keys;
+
         $scope.ModuleTest = "Project Dependency Summary";
 
         $scope.jsonMock = {
