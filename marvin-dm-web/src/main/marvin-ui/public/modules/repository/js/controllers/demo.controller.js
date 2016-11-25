@@ -5,8 +5,9 @@ angular.module('repository')
         $scope.ModuleTest = "Project Dependency Summary";
 
         $scope.jsonMock = {
-            "statusBadgeUrl": "http://localhost:8080/theborakompanioni/vertx-rx-springboot",
-            "project": "vertx-rx-springboot",
+            "statusBadgeUrl": "http://localhost:8080/theborakompanioni/vertx-rx-springboot.svg",
+            "author": "theborakompanioni",
+            "projectName": "vertx-rx-springboot",
             "description": "RxVertx SpringBoot",
             "pom": "https://github.com/theborakompanioni/vertx-rx-springboot/blob/master/pom.xml",
             "dependencies" : {

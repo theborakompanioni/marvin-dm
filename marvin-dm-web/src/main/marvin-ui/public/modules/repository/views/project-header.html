@@ -1,12 +1,13 @@
 <div>
     <div id="repo">
         <h1>
-            <a href="https://github.com/bower">bower</a>
-            <a href="https://github.com/bower/bower/">bower</a>
+            <a ng-href="https://github.com/{{jsonMock.author}}">{{jsonMock.author}}</a> /
+            <a ng-href="https://github.com/{{jsonMock.author}}/{{jsonMock.projectName}}/">{{jsonMock.projectName}}</a>
             <span>1.8.0</span>
             <a class="badge" href="/bower/bower">
-            <img ng-src="{{ jsonMock.statusBadgeUrl }}" alt="dependencies status"></a>
+            <img ng-src="{{ jsonMock.statusBadgeUrl }}" alt="dependencies status" />
+            </a>
         </h1>
-        <p>Description: {{ jsonMock.description }}</p>
+        <p>{{ jsonMock.description }}</p>
     </div>
 </div>
