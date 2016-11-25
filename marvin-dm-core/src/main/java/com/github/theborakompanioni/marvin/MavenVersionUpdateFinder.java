@@ -3,6 +3,7 @@ package com.github.theborakompanioni.marvin;
 import com.github.theborakompanioni.marvin.model.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.MavenInvocationException;
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
 
+@Slf4j
 public class MavenVersionUpdateFinder {
     private static final List<String> GOALS = Collections.singletonList("versions:display-dependency-updates");
     private static final Pattern versionFromLogLinePattern = Pattern.compile("\\[INFO\\] (.*) (.*) -> (.*)");
@@ -34,6 +36,8 @@ public class MavenVersionUpdateFinder {
         requireNonNull(pomFile);
 
         InvocationRequest request = createInvocationRequest(pomFile);
+
+        log.debug("executing maven goals {} for file {}", request.getGoals(), pomFile.getPath());
         final SummaryInvocationResult invocationResult = invoker.apply(request);
         final List<String> outputLines = invocationResult.getOutputLines();
 
